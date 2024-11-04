@@ -1,0 +1,141 @@
+This code builds, trains, and evaluates a simple feedforward neural network (a **fully connected neural network**) using **Keras** for digit classification with the **MNIST dataset**. The MNIST dataset consists of 28x28 pixel grayscale images of handwritten digits (0-9), and this network aims to classify each image by predicting the correct digit.
+
+### Step-by-Step Explanation
+
+1. **Importing Libraries**:
+   ```python
+   import numpy as np
+   import matplotlib.pyplot as plt
+   import tensorflow as tf
+   from tensorflow import keras
+   from keras.datasets import mnist
+   ```
+   - **NumPy** (`np`) for array manipulation and numerical computations.
+   - **Matplotlib** (`plt`) for visualizing data and plotting graphs.
+   - **TensorFlow and Keras** for building and training the neural network.
+   - **MNIST Dataset** from `keras.datasets` for training and testing.
+
+2. **Loading the Dataset**:
+   ```python
+   (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+   ```
+   - The dataset is split into **training** (`x_train`, `y_train`) and **testing** (`x_test`, `y_test`) sets.
+   - Each image (`x_train`, `x_test`) is a 28x28 array of grayscale pixel values, and each label (`y_train`, `y_test`) represents the digit in the image (0-9).
+
+3. **Printing the Shape of the Data**:
+   ```python
+   print(f"Shape of X_train {x_train.shape}")
+   print(f"Shape of y_train {y_train.shape}")
+   print(f"Shape of x_test  {x_test.shape}")
+   print(f"Shape of y_test  {y_test.shape}")
+   ```
+   - **Output**: This will show the dimensions of the training and testing sets:
+     - `x_train` and `x_test`: `(60000, 28, 28)` and `(10000, 28, 28)`, meaning 60,000 training images and 10,000 testing images, each of size 28x28.
+     - `y_train` and `y_test`: `(60000,)` and `(10000,)`, which are 1D arrays containing labels for each image.
+
+4. **Visualizing an Example Image**:
+   ```python
+   plt.imshow(x_train[6], cmap='gray')
+   plt.show()
+   print(y_train[6])
+   ```
+   - Displays the 7th image in the training set with its label.
+   - **Output**: Shows the grayscale image and the correct label, giving a visual understanding of the data.
+
+5. **Displaying Unique Labels**:
+   ```python
+   print(np.unique(y_train))
+   print(np.unique(y_test))
+   ```
+   - Prints unique labels in `y_train` and `y_test`. 
+   - **Output**: `[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]`, confirming that all digits (0-9) are represented in the dataset.
+
+6. **Normalizing the Data**:
+   ```python
+   x_train = x_train / 255.0
+   x_test = x_test / 255.0
+   ```
+   - Each pixel value is scaled from `[0, 255]` to `[0, 1]` by dividing by 255. This **normalization** improves model training stability and performance.
+
+7. **Defining the Network Architecture**:
+   ```python
+   model = keras.Sequential([
+       keras.layers.Flatten(input_shape=(28, 28)),
+       keras.layers.Dense(50, activation='relu', name='L1'),
+       keras.layers.Dense(50, activation='relu', name='L2'),
+       keras.layers.Dense(10, activation='softmax', name='L3')
+   ])
+   ```
+   - **Flatten Layer**: Converts each `28x28` image into a 1D vector of 784 values to feed into the dense layers.
+   - **Dense Layer L1**: A fully connected (dense) layer with 50 neurons and a ReLU (Rectified Linear Unit) activation function, which introduces non-linearity.
+   - **Dense Layer L2**: Another fully connected layer with 50 neurons and ReLU activation.
+   - **Dense Layer L3**: The output layer with 10 neurons, one for each digit class (0-9), and `softmax` activation to output class probabilities.
+
+8. **Compiling the Model**:
+   ```python
+   model.compile(optimizer="sgd", 
+                 loss=tf.keras.losses.SparseCategoricalCrossentropy(), 
+                 metrics=['accuracy'])
+   ```
+   - **Optimizer**: `SGD` (Stochastic Gradient Descent), a standard optimization algorithm to minimize the loss function by adjusting model parameters.
+   - **Loss Function**: `SparseCategoricalCrossentropy` computes the cross-entropy loss between true labels and predictions for multi-class classification.
+   - **Metrics**: Accuracy is used to evaluate model performance during training.
+
+9. **Training the Model**:
+   ```python
+   history = model.fit(x_train, y_train, batch_size=30, epochs=10, validation_data=(x_test, y_test), shuffle=True)
+   ```
+   - **Training**: The model is trained for 10 epochs with a batch size of 30. Validation is done on `x_test` and `y_test` to monitor performance on unseen data.
+   - **History**: Stores accuracy and loss values for each epoch, allowing visualization later.
+
+10. **Evaluating the Model**:
+    ```python
+    test_loss, test_acc = model.evaluate(x_test, y_test)
+    print("Loss = %.3f" % test_loss)
+    print("Accuracy = %.3f" % test_acc)
+    ```
+    - **Evaluation**: The model’s performance on the test data is measured using the loss and accuracy metrics. This helps understand the model’s generalization to unseen data.
+
+11. **Plotting Training Accuracy**:
+    ```python
+    plt.plot(history.history['accuracy'])
+    plt.plot(history.history['val_accuracy'])
+    plt.title('Model Accuracy')
+    plt.ylabel('Accuracy')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Validation'], loc='upper right')
+    plt.show()
+    ```
+    - **Plot**: Shows training and validation accuracy over epochs, allowing visualization of the model’s learning progress. A good model should show increasing accuracy over epochs.
+
+12. **Plotting Training Loss**:
+    ```python
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('Model Loss')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.legend(['Train', 'Validation'], loc='upper left')
+    plt.show()
+    ```
+    - **Plot**: Displays the training and validation loss over epochs, showing how well the model fits the data. A successful model should show decreasing loss values as it trains.
+
+### Key Concepts Used in the Code
+
+1. **Feedforward Neural Network**: The architecture used here is a simple **feedforward network** with fully connected layers. Each layer feeds its output to the next without feedback loops, making it suitable for simple tasks like digit classification.
+
+2. **Activation Functions**: 
+   - **ReLU**: Adds non-linearity, enabling the model to learn more complex patterns.
+   - **Softmax**: Converts the raw scores from the final layer into probabilities for each class, used in the output layer for multi-class classification.
+
+3. **Normalization**: Scaling input values between 0 and 1 to improve training stability and speed.
+
+4. **SGD Optimization**: Adjusts model parameters by calculating gradients of the loss function with respect to each parameter, helping minimize the loss over iterations.
+
+5. **Loss Function (Sparse Categorical Crossentropy)**: Computes cross-entropy between the true labels and predicted probabilities, which is effective for multi-class classification.
+
+6. **Model Evaluation**: Measures how well the model performs on the test set, giving a sense of its generalization ability.
+
+7. **Accuracy and Loss Visualization**: Plots of accuracy and loss over epochs help diagnose the model’s performance, revealing overfitting, underfitting, or convergence issues.
+
+This network, while simple, is effective for basic image classification tasks like digit recognition on MNIST.

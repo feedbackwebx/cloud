@@ -1,0 +1,108 @@
+The provided code implements a Continuous Bag of Words (CBOW) model in PyTorch, a popular neural network model in natural language processing (NLP). CBOW is commonly used for word embedding, where the objective is to predict a target word given its surrounding context words. This model learns distributed representations (embeddings) of words, which capture semantic similarities between words in a continuous vector space.
+
+### Objectives and Concepts in Deep Learning
+The **objective** of this code is to train a neural network to predict the center word (target word) given its surrounding words (context words). In doing so, it builds a word embedding model that assigns each word in the vocabulary a dense vector representation. This embedding captures relationships between words based on their contextual similarities.
+
+The **concepts of deep learning** used in this code include:
+- **Embedding Layer**: A lookup layer that converts each word in the vocabulary to a vector of fixed size, representing the word in a continuous vector space.
+- **Fully Connected (Dense) Layers**: Layers to process and transform the word embeddings to predict the target word.
+- **Activation Functions**: Non-linear transformations such as ReLU, which introduce complexity, allowing the model to learn from patterns in the data.
+- **Backpropagation and Gradient Descent**: Optimization techniques that update the model’s weights based on the loss (error) between predicted and true values.
+  
+### Code Explanation
+Here's a breakdown of each section:
+
+1. **Imports and Helper Function**:
+   ```python
+   import torch
+   import torch.nn as nn
+   ```
+
+   This imports PyTorch, which provides the necessary tools to create and train neural networks. The `make_context_vector` function converts a list of context words to their corresponding indices in the vocabulary, returning them as a tensor for model input.
+
+2. **Model Parameters and Vocabulary Preparation**:
+   ```python
+   CONTEXT_SIZE = 2  # Context words on each side of the target
+   EMDEDDING_DIM = 100  # Size of the word embedding
+   ```
+
+   `CONTEXT_SIZE` defines the number of surrounding words considered for each target word. In this case, 2 words before and 2 words after (total of 4 context words). `EMBEDDING_DIM` sets the dimension for each word vector.
+
+   ```python
+   raw_text = """We are about to study ... our spells.""".split()
+   vocab = set(raw_text)
+   vocab_size = len(vocab)
+   word_to_ix = {word: ix for ix, word in enumerate(vocab)}
+   ix_to_word = {ix: word for ix, word in enumerate(vocab)}
+   ```
+
+   `raw_text` is split into individual words, and `vocab` is built as a set of unique words. `word_to_ix` and `ix_to_word` dictionaries map words to their indices and vice versa.
+
+3. **Data Preparation**:
+   ```python
+   data = []
+   for i in range(2, len(raw_text) - 2):
+       context = [raw_text[i - 2], raw_text[i - 1], raw_text[i + 1], raw_text[i + 2]]
+       target = raw_text[i]
+       data.append((context, target))
+   ```
+
+   The `data` list stores (context, target) pairs. For each target word, the model gathers 2 preceding and 2 following words as context.
+
+4. **CBOW Model Architecture**:
+   ```python
+   class CBOW(nn.Module):
+       def __init__(self, vocab_size, embedding_dim):
+           super(CBOW, self).__init__()
+           self.embeddings = nn.Embedding(vocab_size, embedding_dim)
+           self.linear1 = nn.Linear(embedding_dim, 128)
+           self.activation_function1 = nn.ReLU()
+           self.linear2 = nn.Linear(128, vocab_size)
+           self.activation_function2 = nn.LogSoftmax(dim=-1)
+       ...
+   ```
+
+   The CBOW model class inherits from `nn.Module`:
+   - **Embedding Layer**: Converts words to vector representations.
+   - **Linear Layer 1 and ReLU Activation**: Projects the embedding vector space into a hidden layer with 128 neurons.
+   - **Linear Layer 2 and LogSoftmax Activation**: Transforms the hidden layer output to match the vocabulary size, applying `LogSoftmax` for a probability distribution over possible target words.
+
+5. **Model Training**:
+   ```python
+   model = CBOW(vocab_size, EMDEDDING_DIM)
+   loss_function = nn.NLLLoss()
+   optimizer = torch.optim.SGD(model.parameters(), lr=0.001)
+   ```
+
+   The model is initialized with negative log-likelihood loss (`NLLLoss`) as the criterion, suitable for classification tasks. Stochastic Gradient Descent (SGD) is used for parameter updates.
+
+   ```python
+   for epoch in range(50):
+       total_loss = 0
+       for context, target in data:
+           context_vector = make_context_vector(context, word_to_ix)
+           log_probs = model(context_vector)
+           total_loss += loss_function(log_probs, torch.tensor([word_to_ix[target]]))
+           optimizer.zero_grad()
+           total_loss.backward()
+           optimizer.step()
+   ```
+
+   For each epoch:
+   - **Context Vector Creation**: `context_vector` is created using `make_context_vector`.
+   - **Forward Pass**: The model predicts probabilities for the target word.
+   - **Loss Calculation and Backpropagation**: `NLLLoss` is computed, and gradients are backpropagated.
+   - **Optimizer Step**: Model parameters are updated based on gradients.
+
+6. **Prediction**:
+   ```python
+   context = ['People', 'create', 'to', 'direct']
+   context_vector = make_context_vector(context, word_to_ix)
+   a = model(context_vector)
+   print(f'Prediction: {ix_to_word[torch.argmax(a[0]).item()]}')
+   ```
+
+   After training, the model can predict the target word for a given context, in this case, 'People create to direct'. The model outputs the word with the highest probability.
+
+### Summary
+This code builds and trains a CBOW model to generate word embeddings, leveraging a deep learning concept called **word2vec**. The CBOW approach involves predicting the target word based on surrounding context words, a technique that captures word relationships effectively. The embeddings learned in this process can be useful in various NLP applications, such as text classification, sentiment analysis, and machine translation.

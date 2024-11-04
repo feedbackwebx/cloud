@@ -1,0 +1,10 @@
+What is an Autoencoder?
+Question: What is an autoencoder, and how is it used for anomaly detection?
+
+Answer: An autoencoder is a type of artificial neural network used for unsupervised learning, primarily for the purpose of dimensionality reduction and feature learning. It consists of two main components: the encoder and the decoder.
+
+Encoder: This part of the autoencoder compresses the input data into a lower-dimensional space known as the latent representation (or encoding). It captures the essential features of the input data while discarding irrelevant information.
+
+Decoder: The decoder network takes the latent representation produced by the encoder and reconstructs it back to the original input format. The goal is to minimize the difference between the original input and the reconstructed output.
+
+Anomaly Detection: In the context of anomaly detection, autoencoders learn to represent normal data. When a new input is passed through the autoencoder, if the reconstruction error (the difference between the original input and the output) is above a certain threshold, it indicates that the input is likely an anomaly or outlier, since it doesn't fit the learned representation of normal data.

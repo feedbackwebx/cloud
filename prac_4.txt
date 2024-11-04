@@ -1,0 +1,59 @@
+# Import necessary libraries
+import numpy as np  # For numerical operations and array manipulation
+import pandas as pd  # For handling and processing data (optional in this code)
+import matplotlib.pyplot as plt  # For data visualization and plotting graphs
+from sklearn.model_selection import train_test_split  # For splitting the data into train and test sets
+from sklearn.preprocessing import StandardScaler  # For feature scaling
+import tensorflow as tf  # TensorFlow framework for deep learning
+from tensorflow import keras  # Keras API within TensorFlow for building neural networks
+from tensorflow.keras import layers  # Layer components for building neural networks
+
+
+
+# Step 1: Load and preprocess the dataset
+# Load the MNIST dataset and combine training and testing data for anomaly detection
+data = tf.keras.datasets.mnist
+(x_train, y_train), (x_test, y_test) = data.load_data()
+
+# Combine data and flatten images into 1D arrays
+X = np.concatenate([x_train, x_test])
+y = np.concatenate([y_train, y_test])
+X = X.reshape(X.shape[0], -1)
+
+# Split data into training and testing sets and scale them
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Step 2: Build the autoencoder model
+input_dim = X_train.shape[1]
+encoding_dim = 32  # Define the size of the latent representation
+
+# Define encoder and decoder layers
+input_layer = layers.Input(shape=(input_dim,))
+encoder = layers.Dense(encoding_dim, activation='relu')(input_layer)
+decoder = layers.Dense(input_dim, activation='sigmoid')(encoder)
+
+# Combine encoder and decoder into an autoencoder model
+autoencoder = keras.Model(input_layer, decoder)
+
+# Step 3: Compile and train the model
+autoencoder.compile(optimizer='adam', loss='mean_squared_error')
+history = autoencoder.fit(X_train, X_train, epochs=35, batch_size=256, validation_data=(X_test, X_test), shuffle=True)
+
+# Step 4: Evaluate the model and detect anomalies
+X_test_pred = autoencoder.predict(X_test)
+reconstruction_error = np.mean(np.square(X_test - X_test_pred), axis=1)
+threshold = np.percentile(reconstruction_error, 95)  # 95th percentile as the anomaly threshold
+anomalies = reconstruction_error > threshold
+print(f"Number of anomalies detected: {np.sum(anomalies)}")
+
+# Step 5: Plot training and validation loss
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model Loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Test'], loc='upper right')
+plt.show()

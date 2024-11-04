@@ -1,0 +1,32 @@
+What is CBOW?
+Basic Idea: The CBOW model predicts a target word based on the words that surround it in a sentence. For example, in the sentence "The cat sat on the mat," if we want to predict the word "sat," we might use the words "The," "cat," "on," "the," and "mat" as context.
+
+
+
+Input and Output:
+
+Input: The words around the target word (the context words).
+Output: The target word we are trying to predict.
+Bag of Words: The term "Bag of Words" means that the order of the words doesn’t matter. We only care about which words are present in the context. So, whether we see "The cat" or "cat The," it doesn't change our input.
+
+
+
+How Does CBOW Work?
+Collect Context: When using CBOW, you choose a word (the target) and look at its neighboring words (the context). For example, if your target word is "sat," the context words might be "The," "cat," "on," and "the."
+
+Create Vectors: Each word in your vocabulary (the list of words you care about) is converted into a numerical form called a vector. This representation helps the computer understand and work with words.
+
+Average the Context Vectors: You take the vectors of all the context words and combine them, usually by averaging them. This creates a single vector that represents the overall context.
+
+Predict the Target: The model then uses this combined vector to predict the target word. It looks for the word that has the highest similarity (or closeness) to this context vector in its vocabulary.
+
+Training: During training, the model learns from lots of sentences. It adjusts its word vectors based on how well it predicts the target words from their context. Over time, words that appear in similar contexts will have similar vectors.
+
+
+
+
+
+Why Use CBOW?
+Simplicity: It’s a straightforward method to understand relationships between words.
+Speed: CBOW can be computationally efficient since it processes context words simultaneously.
+Good Representations: It helps generate meaningful word representations that can be used in other tasks like sentiment analysis, text classification, or translation.

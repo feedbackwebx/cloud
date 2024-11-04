@@ -1,0 +1,47 @@
+# Import necessary libraries
+import numpy as np  # For array operations and numerical computations
+import tensorflow as tf  # Core TensorFlow library for deep learning
+from tensorflow.keras.datasets import mnist  # MNIST dataset for image classification tasks
+from tensorflow.keras.models import Sequential  # Sequential model to stack layers
+from tensorflow.keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, Dropout  # Layers for building the CNN
+import matplotlib.pyplot as plt  # For data visualization and plotting
+
+# Step 1: Loading and preprocessing the image data
+(x_train, y_train), (x_test, y_test) = mnist.load_data()  # Load the MNIST dataset
+
+# Reshape the data and normalize it by scaling the pixel values between 0 and 1
+x_train = x_train.reshape((x_train.shape[0], 28, 28, 1)).astype('float32') / 255
+x_test = x_test.reshape((x_test.shape[0], 28, 28, 1)).astype('float32') / 255
+
+# Step 2: Defining the model’s architecture
+model = Sequential()
+
+# Add convolutional and pooling layers
+model.add(Conv2D(28, kernel_size=(3, 3), input_shape=(28, 28, 1)))  # First convolutional layer
+model.add(MaxPooling2D(pool_size=(2, 2)))  # Max pooling layer to reduce spatial dimensions
+model.add(Flatten())  # Flatten layer to convert 2D feature maps into 1D feature vectors
+
+# Add fully connected layers
+model.add(Dense(200, activation="relu"))  # Dense layer with 200 neurons and ReLU activation
+model.add(Dropout(0.3))  # Dropout layer to reduce overfitting by randomly dropping neurons
+model.add(Dense(10, activation="softmax"))  # Output layer with 10 neurons for classification
+
+# Print the model summary to check the structure
+model.summary()
+
+# Step 3: Compiling the model
+model.compile(optimizer='adam',  # Adam optimizer for efficient training
+              loss='sparse_categorical_crossentropy',  # Loss function for multi-class classification
+              metrics=['accuracy'])  # Metric to evaluate during training
+
+# Step 4: Training the model
+model.fit(x_train, y_train, epochs=2)  # Train the model for 2 epochs
+
+# Step 5: Estimating the model's performance
+test_loss, test_accuracy = model.evaluate(x_test, y_test)  # Evaluate the model on test data
+print(f'Test accuracy: {test_accuracy*100:.2f}%')  # Print the test accuracy
+
+# Display an example image from the test set
+image = x_test[9]  # Select an image to display
+plt.imshow(image.reshape(28, 28), cmap='Greys')  # Reshape for displaying as a 2D image
+plt.show()

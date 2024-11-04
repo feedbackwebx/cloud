@@ -1,0 +1,88 @@
+# Import necessary libraries for building the CBOW model using PyTorch
+import torch  # Main PyTorch library for tensor operations and deep learning
+import torch.nn as nn  # Neural network module in PyTorch for defining layers and models
+
+# Helper function to convert context words into tensor indices
+def make_context_vector(context, word_to_ix):
+    idxs = [word_to_ix[w] for w in context]  # Convert context words to indices
+    return torch.tensor(idxs, dtype=torch.long)  # Return as a PyTorch tensor
+
+# Set context size (number of words before and after target) and embedding dimension
+CONTEXT_SIZE = 2  # Number of context words on each side of the target
+EMDEDDING_DIM = 100  # Size of word embeddings
+
+# Build vocabulary from the input text
+vocab = set(raw_text)  # Create a set of unique words from raw text
+vocab_size = len(vocab)  # Vocabulary size
+
+# Create word-to-index and index-to-word mappings
+word_to_ix = {word: ix for ix, word in enumerate(vocab)}
+ix_to_word = {ix: word for ix, word in enumerate(vocab)}
+
+# Step 1: Data preparation
+# Generate training data as (context, target) pairs
+data = []
+for i in range(2, len(raw_text) - 2):
+    context = [raw_text[i - 2], raw_text[i - 1], raw_text[i + 1], raw_text[i + 2]]  # Context words
+    target = raw_text[i]  # Target word
+    data.append((context, target))  # Append context-target pairs
+
+# Step 2: Define the CBOW model architecture
+class CBOW(nn.Module):
+    def __init__(self, vocab_size, embedding_dim):
+        super(CBOW, self).__init__()
+
+        # Embedding layer for word representations
+        self.embeddings = nn.Embedding(vocab_size, embedding_dim)
+
+        # Linear layers for transforming the embedding space
+        self.linear1 = nn.Linear(embedding_dim, 128)
+        self.activation_function1 = nn.ReLU()
+
+        self.linear2 = nn.Linear(128, vocab_size)
+        self.activation_function2 = nn.LogSoftmax(dim=-1)
+
+    def forward(self, inputs):
+        embeds = sum(self.embeddings(inputs)).view(1, -1)  # Sum embeddings of context words
+        out = self.linear1(embeds)
+        out = self.activation_function1(out)
+        out = self.linear2(out)
+        out = self.activation_function2(out)
+        return out
+
+    def get_word_emdedding(self, word):
+        word = torch.tensor([word_to_ix[word]])
+        return self.embeddings(word).view(1, -1)  # Return embedding for a given word
+
+# Step 3: Train the model
+model = CBOW(vocab_size, EMDEDDING_DIM)  # Initialize the model
+loss_function = nn.NLLLoss()  # Negative log-likelihood loss for classification
+optimizer = torch.optim.SGD(model.parameters(), lr=0.001)  # Stochastic gradient descent optimizer
+
+# Train the model for 50 epochs
+for epoch in range(50):
+    total_loss = 0  # Track total loss for the epoch
+
+    for context, target in data:
+        context_vector = make_context_vector(context, word_to_ix)  # Convert context to tensor
+
+        # Forward pass: compute the model's prediction
+        log_probs = model(context_vector)
+
+        # Compute the loss between predicted and actual target
+        total_loss += loss_function(log_probs, torch.tensor([word_to_ix[target]]))
+
+    # Backpropagation
+    optimizer.zero_grad()  # Reset gradients to zero
+    total_loss.backward()  # Backpropagate the loss
+    optimizer.step()  # Update model parameters
+
+# Step 4: Output - predict a target word for a given context
+context = ['People', 'create', 'to', 'direct']  # Example context
+context_vector = make_context_vector(context, word_to_ix)
+a = model(context_vector)
+
+# Print results
+print(f'Raw text: {" ".join(raw_text)}\n')
+print(f'Context: {context}\n')
+print(f'Prediction: {ix_to_word[torch.argmax(a[0]).item()]}')  # Predicted word for the context

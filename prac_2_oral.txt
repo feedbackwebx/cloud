@@ -1,0 +1,35 @@
+1. What is Feedforward Neural Networks?
+
+Question: What is a feedforward neural network?
+
+Answer: A feedforward neural network is one of the simplest types of artificial neural networks. In this model, information moves in only one direction—from the input layer, through the hidden layers (if any), to the output layer. There are no cycles or loops in the network. Each layer consists of neurons, and each neuron applies a weighted sum of its inputs followed by a non-linear activation function. Feedforward neural networks are commonly used for tasks like classification and regression.
+
+
+
+2. What are Keras and TensorFlow?
+Question: What are Keras and TensorFlow?
+
+Answer:
+
+TensorFlow is an open-source deep learning framework developed by Google. It provides a comprehensive ecosystem for building and deploying machine learning models. TensorFlow allows for both high-level and low-level programming, giving users flexibility and control over model design.
+Keras is a high-level API for building neural networks that can run on top of TensorFlow (and other backends like Theano). It simplifies the process of creating and training neural networks by providing user-friendly functions and classes. Keras is particularly popular among beginners and for rapid prototyping due to its ease of use.
+
+
+
+3. What is Training and Testing Data (MNIST/CIFAR10)?
+Question: What are training and testing data? Can you explain using MNIST and CIFAR10?
+
+Answer:
+
+Training Data is the portion of the dataset used to train the model. It helps the model learn the patterns and features of the input data. The model adjusts its parameters based on this data.
+Testing Data is a separate portion of the dataset used to evaluate the performance of the trained model. It checks how well the model generalizes to unseen data.
+MNIST is a dataset of handwritten digits (0-9) containing 60,000 training images and 10,000 testing images. It is commonly used for image classification tasks.
+
+CIFAR10 is a dataset of 60,000 images in 10 different classes (such as airplanes, cars, birds, etc.), with 50,000 training images and 10,000 testing images. It presents a more complex challenge compared to MNIST due to the variety of objects and their backgrounds.
+
+
+
+4. Train the Model Using SGD
+Question: How would you train a model using Stochastic Gradient Descent (SGD)?
+
+Answer: Stochastic Gradient Descent (SGD) is an optimization algorithm used to minimize the loss function in training neural networks. Unlike standard Gradient Descent, which uses the entire dataset to calculate the gradient, SGD updates the model parameters using only one or a few training examples at a time, making it faster and more efficient for large datasets.
